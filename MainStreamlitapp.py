@@ -8,6 +8,35 @@ from camera_input_live import camera_input_live
 import av
 import os
 
+class VideoTransformer(VideoTransformerBase):
+    def __init__(self):
+        self.threshold1 = 100
+        self.threshold2 = 200
+
+    def transform(self, frame):
+        img = frame.to_ndarray(format="bgr24")
+        image = cv2.cvtColor(cv2.Canny(img, 100, 200), cv2.COLOR_GRAY2BGR)
+        return av.VideoFrame.from_ndarray(image, format="bgr24")
+ def toggle_webcam(index):
+    global capture
+    try:
+        if st.session_state.is_webcam_enabled:
+            FRAME_WINDOW = st.image([])
+            camera_index = 1  # Replace with the index you found
+            capture = cv2.VideoCapture(camera_index)
+            _, frame = capture.read()
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            FRAME_WINDOW.image(frame)
+        else:
+            if capture is not None:
+                capture.release()
+    except Exception as e:
+        st.error(f"Error accessing webcam: {e}")
+def Web_RTC_Video(frame):
+    image = frame.to_ndarray(format="bgr24")
+    image = cv2.cvtColor(cv2.Canny(image, 100, 200), cv2.COLOR_GRAY2BGR)
+    return av.VideoFrame.from_ndarray(image, format="bgr24")
+
 # Directory to save captured images
 CAPTURE_DIR = "captured_images"
 if not os.path.exists(CAPTURE_DIR):
