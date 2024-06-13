@@ -8,6 +8,25 @@ from camera_input_live import camera_input_live
 import av
 import os
 
+if st.button("Start Webcam"):
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if ret:
+                st.image(frame, channels="BGR")
+                if st.button("Capture Right Eye"):
+                    filename = capture_image("Right", name, label, cap)
+                    if filename:
+                        st.success(f"Right eye image captured and saved as {filename}")
+                if st.button("Capture Left Eye"):
+                    filename = capture_image("Left", name, label, cap)
+                    if filename:
+                        st.success(f"Left eye image captured and saved as {filename}")
+                if st.button("Stop Webcam"):
+                    break
+            else:
+                st.error("Failed to read from webcam")
+
+    cap.release()
 
 
 # Directory to save captured images
