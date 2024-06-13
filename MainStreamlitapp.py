@@ -10,7 +10,12 @@ import os
 from PIL import Image
 from io import BytesIO
 import tensorflow as tf
+# Load the pre-trained model (assumed to be in the same directory)
+MODEL_PATH = 'model.h5'
+model = tf.keras.models.load_model(MODEL_PATH)
 
+# Define the class names for the retinal diseases
+CLASS_NAMES = ['Disease 1', 'Disease 2', 'Disease 3', 'Disease 4']
 # Function to save image from camera input
 def save_image_from_camera(image_data, side, name):
     if image_data is not None:
