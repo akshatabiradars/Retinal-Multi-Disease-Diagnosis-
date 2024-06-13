@@ -1,0 +1,8 @@
+streamlit
+opencv-python
+numpy 
+streamlit-camera-input-live
+streamlit_webrtc
+imageio
+av
+opencv-python-headless
