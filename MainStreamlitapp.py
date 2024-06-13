@@ -13,13 +13,25 @@ CAPTURE_DIR = "captured_images"
 if not os.path.exists(CAPTURE_DIR):
     os.makedirs(CAPTURE_DIR)
 
-st.title("Retinal Multi Disease Diagnosis App")
+st.title("Retinal Multi Disease Diagnosis - App")
 
-# Function to capture an image from the webcam
+def get_camera_index():
+    for index in range(10):  # Check first 10 camera indices
+        cap = cv2.VideoCapture(index)
+        if cap.isOpened():
+            cap.release()
+            return index
+    return None
+
 def capture_image(side, name):
-    cap = cv2.VideoCapture(0)
+    camera_index = get_camera_index()
+    if camera_index is None:
+        st.error("No camera found")
+        return None
+
+    cap = cv2.VideoCapture(camera_index)
     ret, frame = cap.read()
-    if ret: 
+    if ret:
         cap.release()
         filename = f"{CAPTURE_DIR}/{side}_Eye_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.jpg"
         cv2.imwrite(filename, frame)
