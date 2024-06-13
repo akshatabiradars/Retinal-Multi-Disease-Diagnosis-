@@ -8,41 +8,14 @@ from camera_input_live import camera_input_live
 import av
 import os
 
-class VideoTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.threshold1 = 100
-        self.threshold2 = 200
 
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        image = cv2.cvtColor(cv2.Canny(img, 100, 200), cv2.COLOR_GRAY2BGR)
-        return av.VideoFrame.from_ndarray(image, format="bgr24")
-    def toggle_webcam(index):
-        global capture
-        try:
-            if st.session_state.is_webcam_enabled:
-                FRAME_WINDOW = st.image([])
-                camera_index = 1  # Replace with the index you found
-                capture = cv2.VideoCapture(camera_index)
-                _, frame = capture.read()
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                FRAME_WINDOW.image(frame)
-            else:
-                if capture is not None:
-                    capture.release()
-        except Exception as e:
-            st.error(f"Error accessing webcam: {e}")
-    def Web_RTC_Video(frame):
-        image = frame.to_ndarray(format="bgr24")
-        image = cv2.cvtColor(cv2.Canny(image, 100, 200), cv2.COLOR_GRAY2BGR)
-        return av.VideoFrame.from_ndarray(image, format="bgr24")
 
 # Directory to save captured images
 CAPTURE_DIR = "captured_images"
 if not os.path.exists(CAPTURE_DIR):
     os.makedirs(CAPTURE_DIR)
 
-st.title("Retinal Multi Disease Diagnosis - App")
+st.title("Retinal Multi Disease Diagnosis - Platform")
 
 def get_camera_index():
     for index in range(10):  # Check first 10 camera indices
@@ -52,17 +25,23 @@ def get_camera_index():
             return index
     return None
 
-def capture_image(side, name):
+def capture_image(side, name, label):
     camera_index = get_camera_index()
     if camera_index is None:
         st.error("No camera found")
         return None
 
-    cap = cv2.VideoCapture(camera_index)
+    cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)  # Try using DirectShow (Windows)
+    # cap = cv2.VideoCapture(camera_index, cv2.CAP_V4L2)  # Try using V4L2 (Linux)
+
+    if not cap.isOpened():
+        st.error("Failed to open camera")
+        return None
+
     ret, frame = cap.read()
     if ret:
         cap.release()
-        filename = f"{CAPTURE_DIR}/{side}_Eye_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.jpg"
+        filename = f"{CAPTURE_DIR}/{side}_Eye_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}_{label}.jpg"
         cv2.imwrite(filename, frame)
         return filename
     else:
@@ -73,16 +52,18 @@ def capture_image(side, name):
 # UI to capture images
 st.header("Capture Eye Images")
 name = st.text_input("Enter Name")
+label = st.selectbox("Select Label", ["Healthy", "Diseased", "Other"])
+
 right_eye_capture = st.button("Capture Right Eye")
 left_eye_capture = st.button("Capture Left Eye")
 
 if right_eye_capture:
-    filename = capture_image("Right", name)
+    filename = capture_image("Right", name, label)
     if filename:
         st.success(f"Right eye image captured and saved as {filename}")
 
 if left_eye_capture:
-    filename = capture_image("Left", name)
+    filename = capture_image("Left", name, label)
     if filename:
         st.success(f"Left eye image captured and saved as {filename}")
 
@@ -112,3 +93,4 @@ if captured_files:
             st.image(cropped_image, caption=cropped_filename, use_column_width=True)
 else:
     st.info("No captured images found")
+
