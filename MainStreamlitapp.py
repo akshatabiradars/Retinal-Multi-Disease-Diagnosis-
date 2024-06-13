@@ -29,7 +29,7 @@ class VideoTransformer(VideoTransformerBase):
                 FRAME_WINDOW.image(frame)
             else:
                 if capture is not None:
-                capture.release()
+                    capture.release()
         except Exception as e:
         st.error(f"Error accessing webcam: {e}")
 def Web_RTC_Video(frame):
