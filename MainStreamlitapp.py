@@ -10,39 +10,21 @@ import os
 from PIL import Image
 from io import BytesIO
 
-# Function to capture image from webcam
-def capture_image(side, name):
-    stframe = st.empty()
-    video_capture = cv2.VideoCapture(0)
-    
-    if not video_capture.isOpened():
-        stframe.text("Could not open webcam.")
-        return None
-    
-    stframe.text(f"Capturing {side} Eye. Press 's' to save and 'q' to quit.")
-    
-    while True:
-        ret, frame = video_capture.read()
-        if not ret:
-            stframe.text("Failed to capture image.")
-            break
-        
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        stframe.image(frame_rgb)
-        
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('s'):
-            img_name = f"{side}_Eye_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.jpg"
-            img_path = os.path.join('captured_images', img_name)
-            cv2.imwrite(img_path, frame)
-            stframe.text(f"Saved {img_name}")
-            break
-        elif key == ord('q'):
-            break
+import streamlit as st
+import os
+from datetime import datetime
+from PIL import Image
+from io import BytesIO
 
-    video_capture.release()
-    cv2.destroyAllWindows()
-    return img_path
+# Function to save image from camera input
+def save_image_from_camera(image_data, side, name):
+    if image_data is not None:
+        img = Image.open(BytesIO(image_data))
+        img_name = f"{side}_Eye_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.jpg"
+        img_path = os.path.join('captured_images', img_name)
+        img.save(img_path)
+        return img_path
+    return None
 
 # Function to crop image
 def crop_image(image, coords):
@@ -63,15 +45,17 @@ def main():
     person_name = st.sidebar.text_input("Enter Name:")
     capture_side = st.sidebar.radio("Capture Side", ('Right Eye', 'Left Eye'))
     
-    if st.sidebar.button("Capture Image"):
-        if not person_name:
-            st.sidebar.warning("Please enter a name before capturing.")
+    # Capture image using Streamlit's built-in camera input
+    image_data = st.camera_input("Capture Image")
+    
+    if image_data and person_name:
+        img_path = save_image_from_camera(image_data.getvalue(), capture_side, person_name)
+        if img_path:
+            st.sidebar.success(f"Image saved: {img_path}")
         else:
-            img_path = capture_image(capture_side, person_name)
-            if img_path:
-                st.sidebar.success(f"Image saved: {img_path}")
-            else:
-                st.sidebar.error("Image capture failed.")
+            st.sidebar.error("Image capture failed.")
+    elif image_data and not person_name:
+        st.sidebar.warning("Please enter a name before capturing.")
 
     st.sidebar.subheader("Captured Images")
     captured_files = load_images()
