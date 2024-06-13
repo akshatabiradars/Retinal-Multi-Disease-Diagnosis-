@@ -31,11 +31,11 @@ class VideoTransformer(VideoTransformerBase):
                 if capture is not None:
                     capture.release()
         except Exception as e:
-        st.error(f"Error accessing webcam: {e}")
-def Web_RTC_Video(frame):
-    image = frame.to_ndarray(format="bgr24")
-    image = cv2.cvtColor(cv2.Canny(image, 100, 200), cv2.COLOR_GRAY2BGR)
-    return av.VideoFrame.from_ndarray(image, format="bgr24")
+            st.error(f"Error accessing webcam: {e}")
+    def Web_RTC_Video(frame):
+        image = frame.to_ndarray(format="bgr24")
+        image = cv2.cvtColor(cv2.Canny(image, 100, 200), cv2.COLOR_GRAY2BGR)
+        return av.VideoFrame.from_ndarray(image, format="bgr24")
 
 # Directory to save captured images
 CAPTURE_DIR = "captured_images"
