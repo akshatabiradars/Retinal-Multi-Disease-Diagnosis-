@@ -21,16 +21,16 @@ class VideoTransformer(VideoTransformerBase):
         global capture
         try:
             if st.session_state.is_webcam_enabled:
-            FRAME_WINDOW = st.image([])
-            camera_index = 1  # Replace with the index you found
-            capture = cv2.VideoCapture(camera_index)
-            _, frame = capture.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            FRAME_WINDOW.image(frame)
-        else:
-            if capture is not None:
+                FRAME_WINDOW = st.image([])
+                camera_index = 1  # Replace with the index you found
+                capture = cv2.VideoCapture(camera_index)
+                _, frame = capture.read()
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                FRAME_WINDOW.image(frame)
+            else:
+                if capture is not None:
                 capture.release()
-    except Exception as e:
+        except Exception as e:
         st.error(f"Error accessing webcam: {e}")
 def Web_RTC_Video(frame):
     image = frame.to_ndarray(format="bgr24")
