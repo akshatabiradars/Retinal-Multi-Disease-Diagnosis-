@@ -17,10 +17,10 @@ class VideoTransformer(VideoTransformerBase):
         img = frame.to_ndarray(format="bgr24")
         image = cv2.cvtColor(cv2.Canny(img, 100, 200), cv2.COLOR_GRAY2BGR)
         return av.VideoFrame.from_ndarray(image, format="bgr24")
- def toggle_webcam(index):
-    global capture
-    try:
-        if st.session_state.is_webcam_enabled:
+    def toggle_webcam(index):
+        global capture
+        try:
+            if st.session_state.is_webcam_enabled:
             FRAME_WINDOW = st.image([])
             camera_index = 1  # Replace with the index you found
             capture = cv2.VideoCapture(camera_index)
