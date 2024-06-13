@@ -11,24 +11,33 @@ from PIL import Image
 from io import BytesIO
 
 # Function to capture image from webcam
-def capture_image(side):
+def capture_image(side, name):
     stframe = st.empty()
     video_capture = cv2.VideoCapture(0)
     
-    stframe.text("Capturing {} Eye. Press 's' to save and 'q' to quit.".format(side))
+    if not video_capture.isOpened():
+        stframe.text("Could not open webcam.")
+        return None
+    
+    stframe.text(f"Capturing {side} Eye. Press 's' to save and 'q' to quit.")
     
     while True:
         ret, frame = video_capture.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        stframe.image(frame)
-        
-        if cv2.waitKey(1) & 0xFF == ord('s'):
-            img_name = "{}_Eye_{}.jpg".format(side, datetime.now().strftime("%Y%m%d_%H%M%S"))
-            img_path = os.path.join('captured_images', img_name)
-            cv2.imwrite(img_path, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-            stframe.text("Saved {}".format(img_name))
+        if not ret:
+            stframe.text("Failed to capture image.")
             break
-        elif cv2.waitKey(1) & 0xFF == ord('q'):
+        
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        stframe.image(frame_rgb)
+        
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('s'):
+            img_name = f"{side}_Eye_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.jpg"
+            img_path = os.path.join('captured_images', img_name)
+            cv2.imwrite(img_path, frame)
+            stframe.text(f"Saved {img_name}")
+            break
+        elif key == ord('q'):
             break
 
     video_capture.release()
@@ -41,6 +50,8 @@ def crop_image(image, coords):
 
 # Function to load captured images
 def load_images(path='captured_images'):
+    if not os.path.exists(path):
+        os.makedirs(path)
     files = os.listdir(path)
     return [f for f in files if f.endswith('.jpg')]
 
@@ -56,8 +67,11 @@ def main():
         if not person_name:
             st.sidebar.warning("Please enter a name before capturing.")
         else:
-            img_path = capture_image(capture_side)
-            st.sidebar.success(f"Image saved: {img_path}")
+            img_path = capture_image(capture_side, person_name)
+            if img_path:
+                st.sidebar.success(f"Image saved: {img_path}")
+            else:
+                st.sidebar.error("Image capture failed.")
 
     st.sidebar.subheader("Captured Images")
     captured_files = load_images()
@@ -68,9 +82,9 @@ def main():
             image = Image.open(os.path.join('captured_images', selected_file))
             st.image(image, caption=selected_file)
 
-            crop_coords = st.slider("Select Crop Area", 0, 100, (25, 75), step=5)
+            crop_coords = st.slider("Select Crop Area (left, upper, right, lower)", 0, min(image.size), (0, 0, image.size[0], image.size[1]), step=1)
             if st.button("Crop and Save"):
-                cropped_image = crop_image(image, (crop_coords[0], crop_coords[0], crop_coords[1], crop_coords[1]))
+                cropped_image = crop_image(image, crop_coords)
                 cropped_path = os.path.join('cropped_images', selected_file.replace('.jpg', '_cropped.jpg'))
                 cropped_image.save(cropped_path)
                 st.success(f"Cropped image saved: {cropped_path}")
@@ -81,5 +95,6 @@ if __name__ == "__main__":
     if not os.path.exists('cropped_images'):
         os.makedirs('cropped_images')
     main()
+
 
 
