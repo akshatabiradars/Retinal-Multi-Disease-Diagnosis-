@@ -17,7 +17,7 @@ st.title("Retinal Multi Disease Diagnosis App")
 
 # Function to capture an image from the webcam
 def capture_image(side, name):
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(camera_index)
     ret, frame = cap.read()
     if ret: 
         cap.release()
