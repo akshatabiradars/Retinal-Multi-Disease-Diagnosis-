@@ -26,7 +26,7 @@ if st.button("Start Webcam"):
             else:
                 st.error("Failed to read from webcam")
 
-    cap.release()
+cap.release()
 
 
 # Directory to save captured images
