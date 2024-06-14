@@ -6,4 +6,4 @@ streamlit_webrtc
 imageio
 av
 opencv-python-headless
-tensorflow as tf
+tensorflow
