@@ -10,6 +10,7 @@ from PIL import Image
 from io import BytesIO
 import tensorflow as tf
 
+
 # Function to save image from camera input
 def save_image_from_camera(image_data, side, name):
     if image_data is not None:
@@ -20,16 +21,16 @@ def save_image_from_camera(image_data, side, name):
         return img_path
     return None
 
-# Function to crop image
-def crop_image(image, coords):
-    return image.crop(coords)
-
 # Function to load captured images
 def load_images(path='captured_images'):
     if not os.path.exists(path):
         os.makedirs(path)
     files = os.listdir(path)
     return [f for f in files if f.endswith('.jpg')]
+
+# Function to crop image
+def crop_image(image, left, upper, right, lower):
+    return image.crop((left, upper, right, lower))
 
 # Main function
 def main():
@@ -60,9 +61,15 @@ def main():
             image = Image.open(os.path.join('captured_images', selected_file))
             st.image(image, caption=selected_file)
 
-            crop_coords = st.slider("Select Crop Area (left, upper, right, lower)", 0, min(image.size), (0, 0, image.size[0], image.size[1]), step=1)
-            if st.button("Crop and Save"):
-                cropped_image = crop_image(image, crop_coords)
+            st.sidebar.subheader("Crop Image")
+            width, height = image.size
+            left = st.sidebar.slider("Left", 0, width, 0)
+            upper = st.sidebar.slider("Upper", 0, height, 0)
+            right = st.sidebar.slider("Right", 0, width, width)
+            lower = st.sidebar.slider("Lower", 0, height, height)
+
+            if st.sidebar.button("Crop and Save"):
+                cropped_image = crop_image(image, left, upper, right, lower)
                 cropped_path = os.path.join('cropped_images', selected_file.replace('.jpg', '_cropped.jpg'))
                 cropped_image.save(cropped_path)
                 st.success(f"Cropped image saved: {cropped_path}")
@@ -73,6 +80,7 @@ if __name__ == "__main__":
     if not os.path.exists('cropped_images'):
         os.makedirs('cropped_images')
     main()
+
 
 
 
