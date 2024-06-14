@@ -1,8 +1,12 @@
-streamlit
-opencv-python
 numpy 
+tensorflow
+streamlit
+wheel
+opencv-python-headless
+tensorflow_hub
+tensorrt
+opencv-python
 streamlit-camera-input-live
 streamlit_webrtc
 imageio
 av
-opencv-python-headless
